@@ -176,7 +176,7 @@ function connectedComponents(boolArr) {
   var ctx;
 
   var testImage = new Image();
-  testImage.src = 'GB.png';
+  testImage.src = 'kakuro.png';
   testImage.onload = function() {
     var canvas = document.createElement('canvas');
     canvas.width = testImage.width;
