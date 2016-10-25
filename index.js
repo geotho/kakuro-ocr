@@ -98,7 +98,7 @@ function imageDataToBoolArr(imageData) {
   for (let i = 0; i < imageData.height; i++) {
     const row = [];
     for (let j = 0; j < imageData.width; j++) {
-      row.push(imageData.data[i*imageData.width+j*4] === 255)
+      row.push(imageData.data[4*(i*imageData.width+j)] === 255)
       // row.push(false);
     }
     arr.push(row);
