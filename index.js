@@ -156,8 +156,8 @@ function connectedComponents(boolArr) {
 
         for (let k = el.i-1; k < el.i+2; k++) {
           for (let l = el.j-1; l < el.j+2; l++) {
-            if (k > 0 && k < boolArr.length && l > 0 && l < boolArr[0].length &&
-                !boolArr[k][l] && !visited[k][l]) {
+            if (k > 0 && k < boolArr[0].length && l > 0 && l < boolArr.length &&
+                !boolArr[l][k] && !visited[l][k]) {
               q.push({i: k, j: l});
             }
           }
@@ -166,10 +166,48 @@ function connectedComponents(boolArr) {
       components.push(component);
     }
   }
-  components.sort((a, b) => b.size - a.size);
+  // components.sort((a, b) => b.size - a.size);
+  components.sort((a, b) =>
+    (b.bottomRight.i - b.topLeft.i) * (b.bottomRight.j - b.topLeft.j) -
+    (a.bottomRight.i - a.topLeft.i) * (a.bottomRight.j - a.topLeft.j)
+  )
   return components;
 }
 
+function floodFill(ctx, width, height, x, y) {
+
+  const imageData = ctx.getImageData(0, 0, width, height);
+  const buffer = new Uint32Array(imageData.data.buffer);
+  const colour = buffer[y * width + x];
+  const q = [{x, y}];
+  const visited = [];
+
+  while (q.length) {
+    const el = q.pop();
+    if (visited[el.y * width + el.x]) {
+      continue;
+    }
+    visited[el.y * width + el.x] = true;
+    buffer[el.y * width + el.x] = 0xFF0000FF;
+
+    for (let k = el.x-1; k < el.x+2; k++) {
+      for (let l = el.y-1; l < el.y+2; l++) {
+        if (k > 0 && k < width && l > 0 && l < height &&
+            !visited[l * width + k] && buffer[l * width + k] === colour) {
+          q.push({x: k, y: l});
+        }
+      }
+    }
+  }
+  ctx.putImageData(imageData, 0, 0);
+}
+
+function paintPixel(ctx, width, height, x, y) {
+  const imageData = ctx.getImageData(0, 0, width, height);
+  const buffer = new Uint32Array(imageData.data.buffer);
+  buffer[imageData.width*y + x] = 0xFF0000FF;
+  ctx.putImageData(imageData, 0, 0);
+}
 
 (function() {
   var testImageData;
@@ -192,7 +230,15 @@ function connectedComponents(boolArr) {
       updateImage(input.value);
     };
     updateImage();
-  }
+
+    canvas.onclick = ({offsetX, offsetY}) => {
+      console.log(offsetX, offsetY);
+      floodFill(ctx, testImage.width, testImage.height, offsetX, offsetY);
+      // console.log(buffer);
+      // ctx.getImageData(0, 0, testImage.width, testImage.height).data.
+      // console.log('now it"s', ctx.getImageData(0, 0, testImage.width, testImage.height))
+    };
+  };
 
   document.body.appendChild(testImage);
 
